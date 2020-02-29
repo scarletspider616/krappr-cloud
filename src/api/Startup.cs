@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using api.api.Services.Profiles;
+using api.Domain.Services;
+using api.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +40,19 @@ namespace api
                 options.Audience = Configuration["Auth0:Audience"];
             });
 
+            // Auto Mapper Configurations
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new LocationProfile());
+                mc.AddProfile(new PlacesNearBySearchRequestProfile());
+                mc.AddProfile(new BathroomProfile());
+            });
+
+            var mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
+            services.AddScoped<INearbyPlacesSearchService, GoogleNearbyPlacesSearchService>();
+
             services.AddControllers();
         }
 
@@ -55,10 +72,7 @@ namespace api
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }
