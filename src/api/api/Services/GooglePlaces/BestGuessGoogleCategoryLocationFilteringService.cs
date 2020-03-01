@@ -51,7 +51,7 @@ namespace api.Services
                 (from placeLocationType in nearbyResult.Types
                     where !(placeLocationType is null)
                     select (PlaceLocationType) placeLocationType)
-                .Any(locationType => _expectedLocationTypes.Contains(locationType))).ToList();
+                .Any(locationType => _expectedLocationTypes.Contains(locationType)));
         }
     }
 }
