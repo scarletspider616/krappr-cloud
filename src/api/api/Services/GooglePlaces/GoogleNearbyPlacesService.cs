@@ -18,12 +18,15 @@ namespace api.Services
         private readonly string _placesApiKey;
         private readonly ILogger<GoogleNearbyPlacesSearchService> _logger;
         private readonly IMapper _mapper;
+        private readonly ILocationFilteringService _locationFilteringService;
 
         public GoogleNearbyPlacesSearchService(
+            ILocationFilteringService locationFilteringService,
             ILogger<GoogleNearbyPlacesSearchService> logger,
             IMapper mapper,
             IConfiguration configuration)
         {
+            _locationFilteringService = locationFilteringService;
             _logger = logger;
             _mapper = mapper;
             if (string.IsNullOrWhiteSpace(configuration[GooglePlacesApiKeyConfigKey]))
@@ -39,7 +42,8 @@ namespace api.Services
             var request = _mapper.Map<PlacesNearBySearchRequest>(searchParameters);
             request.Key = _placesApiKey;
             var response = await GooglePlaces.NearBySearch.QueryAsync(request);
-            return _mapper.Map<IEnumerable<Bathroom>>(response.Results);
+            var results = _locationFilteringService.FilterExpectedBathroomLocations(response.Results);
+            return _mapper.Map<IEnumerable<Bathroom>>(results);
         }
     }
 }
